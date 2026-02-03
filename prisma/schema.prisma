@@ -1,0 +1,35 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User ─────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())   // cuid = collision-resistant unique id
+  email     String   @unique                // login identifier
+  password  String                          // bcrypt hash — NEVER the plain text
+  name      String
+  createdAt DateTime @default(now())
+
+  // Relation: one user → many posts
+  posts     Post[]
+}
+
+// ─── Post (CRUD demo entity) ──────────────────────────
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  authorId  String                          // FK → User.id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt             // auto-updates on every save
+
+  // Relation back to User
+  author    User     @relation(fields: [authorId], references: [id])
+}
